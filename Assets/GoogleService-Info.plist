@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>74497652064-sg6vnqe6fo4tcnmc6blamu354rjhpuue.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.74497652064-sg6vnqe6fo4tcnmc6blamu354rjhpuue</string>
+	<key>API_KEY</key>
+	<string>AIzaSyAVYF9EKuEVURGSD1IXJ_ZJav0vuF4AkOs</string>
+	<key>GCM_SENDER_ID</key>
+	<string>74497652064</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.MatteoDallOlmo.Sport-Dojo</string>
+	<key>PROJECT_ID</key>
+	<string>sport-dojo-6fcfb</string>
+	<key>STORAGE_BUCKET</key>
+	<string>sport-dojo-6fcfb.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:74497652064:ios:7123694250641b342bda05</string>
+</dict>
+</plist>
