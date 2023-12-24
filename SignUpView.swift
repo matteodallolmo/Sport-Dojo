@@ -178,8 +178,8 @@ func signUpWithGoogle() {
                     print(error!.localizedDescription)
                 }
                 else if(result != nil) {
-                    let firebaseUser = result!.user
-                    let firebaseUID = firebaseUser.uid
+                    //let firebaseUser = result!.user
+                    //let firebaseUID = firebaseUser.uid
                 }
             }
         }
