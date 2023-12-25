@@ -9,10 +9,9 @@ import SwiftUI
 
 struct HomeScreen: View {
     
+    @StateObject var user = User()
+    
     var body: some View {
-        
-        @StateObject var user = User()
-        
         NavigationStack {
     GeometryReader { geometry in
         ZStack {

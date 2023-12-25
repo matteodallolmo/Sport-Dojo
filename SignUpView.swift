@@ -185,7 +185,7 @@ extension SignUpView {
                 user.uid = firebaseUser.uid
                 let database = Firestore.firestore()
                 do {
-                    try await database.collection("users").addDocument(data: ["username":googleUser.profile?.givenName, "email":googleUser.profile?.email,  "uid":user.uid])
+                    try await database.collection("users").addDocument(data: ["username":googleUser.profile!.givenName as Any, "email":googleUser.profile!.email as Any,  "uid":user.uid])
                 }
             } catch {
                 print("Firebase/Google sign in failed")
