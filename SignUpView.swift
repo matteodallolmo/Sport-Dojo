@@ -74,9 +74,11 @@ struct SignUpView: View {
                             .frame(width: geometry.size.width * 0.9, height: geometry.size.height/20)
                         
                         Button(action: {
-                            firebaseUID = signUpWithEmail(username: username, email: email, password: password, birthdate: birthdate)
-                            if(firebaseUID != "") {
-                                isActive = true
+                            Task {
+                                await signUpWithEmail(username: username, email: email, password: password, birthdate: birthdate)
+                                if(firebaseUID != "") {
+                                    isActive = true
+                                }
                             }
                         }, label: {
                             Text("CREATE ACCOUNT")
@@ -105,9 +107,11 @@ struct SignUpView: View {
                             })
                             
                             Button(action: {
-                                firebaseUID = signUpWithGoogle()
-                                if(firebaseUID != "") {
-                                    isActive = true
+                                Task {
+                                    await signUpWithGoogle()
+                                    if(firebaseUID != "") {
+                                        isActive = true
+                                    }
                                 }
                             }, label: {
                                 Image("Google")
@@ -131,79 +135,63 @@ struct SignUpView: View {
         }
         .navigationBarBackButtonHidden(true)
         .navigationDestination(isPresented: $isActive) {
-            HomeScreen()
+            TutorialScreen1(uid: firebaseUID)
         }
     }
 }
 
 extension SignUpView {
     
-    func signUpWithEmail(username: String, email: String, password: String, birthdate: Date) -> String {
-        var firebaseUID = ""
-        
-        Auth.auth().createUser(withEmail: email, password: password) { (result, err) in
-            
-            if(err != nil)
-            {
-                print(err!.localizedDescription)
+    func signUpWithEmail(username: String, email: String, password: String, birthdate: Date) async {
+        do {
+            let result = try await Auth.auth().createUser(withEmail: email, password: password)
+            let firebaseUser = result.user
+            firebaseUID = firebaseUser.uid
+            let database = Firestore.firestore()
+            do {
+                try await database.collection("users").addDocument(data: ["username":username, "email":email, "password":password, "birthdate":birthdate,  "uid":firebaseUID])
+            } catch {
+                print("Failed to add user to database")
             }
-            else if(result != nil)
-            {
-                let database = Firestore.firestore()
-                database.collection("users").addDocument(data: ["username":username, "email":email, "password":password, "birthdate":birthdate,  "uid":result!.user.uid]) { (error) in
-                    if(error != nil)
-                    {
-                        print("Account made successfully, but user data couldn't be saved")
-                    }
-                    else {
-                        firebaseUID = result!.user.uid
-                    }
-                }
-            }
+        } catch {
+            print("Failed to sign up with email/password")
         }
-        
-        return firebaseUID
     }
     
-    func signUpWithGoogle() -> String {
-        var firebaseUID = ""
-        
+    func signUpWithGoogle() async {
         guard let clientID = FirebaseApp.app()?.options.clientID else {
             fatalError("No client ID found")
         }
         let config = GIDConfiguration(clientID: clientID)
         GIDSignIn.sharedInstance.configuration = config
         
-        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-              let window = windowScene.windows.first,
-              let rootVC = window.rootViewController else {
+        guard let windowScene = await UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let window = await windowScene.windows.first,
+              let rootVC = await window.rootViewController else {
             print("There is no root vc")
-            return firebaseUID
+            return
         }
         
-        GIDSignIn.sharedInstance.signIn(withPresenting: rootVC) { result, error in
-            if(error != nil) {
-                print(error!.localizedDescription)
-            }
-            else if(result != nil) {
-                let user = result!.user
-                let idTokenString = user.idToken?.tokenString
-                let accessTokenString = user.accessToken.tokenString
-                let credential = GoogleAuthProvider.credential(withIDToken: idTokenString!, accessToken: accessTokenString)
-                
-                Auth.auth().signIn(with: credential) { result, error in
-                    if(error != nil) {
-                        print(error!.localizedDescription)
-                    }
-                    else if(result != nil) {
-                        let firebaseUser = result!.user
-                        firebaseUID = firebaseUser.uid
-                    }
+        do {
+            let googleResult = try await GIDSignIn.sharedInstance.signIn(withPresenting: rootVC)
+            let googleUser = googleResult.user
+            let idTokenString = googleUser.idToken?.tokenString
+            let accessTokenString = googleUser.accessToken.tokenString
+            let credential = GoogleAuthProvider.credential(withIDToken: idTokenString!, accessToken: accessTokenString)
+            do {
+                let firebaseResult = try await Auth.auth().signIn(with: credential)
+                let firebaseUser = firebaseResult.user
+                firebaseUID = firebaseUser.uid
+                let database = Firestore.firestore()
+                do {
+                    try await database.collection("users").addDocument(data: ["username":googleUser.profile?.givenName, "email":googleUser.profile?.email,  "uid":firebaseUID])
                 }
+            } catch {
+                print("Firebase/Google sign in failed")
             }
+        } catch {
+            print("Google token failed")
         }
-        
-        return firebaseUID
     }
 }
 
