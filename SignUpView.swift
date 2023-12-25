@@ -169,9 +169,9 @@ func signUpWithGoogle() {
         }
         else if(result != nil) {
             let user = result!.user
-            let googleUID = user.userID
+            let idTokenString = user.idToken?.tokenString
             let accessTokenString = user.accessToken.tokenString
-            let credential = GoogleAuthProvider.credential(withIDToken: googleUID!, accessToken: accessTokenString)
+            let credential = GoogleAuthProvider.credential(withIDToken: idTokenString!, accessToken: accessTokenString)
             
             Auth.auth().signIn(with: credential) { result, error in
                 if(error != nil) {
