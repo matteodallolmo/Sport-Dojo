@@ -19,7 +19,8 @@ struct SignUpView: View {
     @State var username = ""
     @State var birthdate = Date()
     @State var isActive = false
-    @State var firebaseUID = ""
+
+    @EnvironmentObject var user: User
     
     var body: some View {
         NavigationStack {
@@ -76,7 +77,7 @@ struct SignUpView: View {
                         Button(action: {
                             Task {
                                 await signUpWithEmail(username: username, email: email, password: password, birthdate: birthdate)
-                                if(firebaseUID != "") {
+                                if(user.uid != "") {
                                     isActive = true
                                 }
                             }
@@ -109,7 +110,7 @@ struct SignUpView: View {
                             Button(action: {
                                 Task {
                                     await signUpWithGoogle()
-                                    if(firebaseUID != "") {
+                                    if(user.uid != "") {
                                         isActive = true
                                     }
                                 }
@@ -135,7 +136,7 @@ struct SignUpView: View {
         }
         .navigationBarBackButtonHidden(true)
         .navigationDestination(isPresented: $isActive) {
-            TutorialScreen1(uid: firebaseUID)
+            TutorialScreen1()
         }
     }
 }
@@ -146,10 +147,10 @@ extension SignUpView {
         do {
             let result = try await Auth.auth().createUser(withEmail: email, password: password)
             let firebaseUser = result.user
-            firebaseUID = firebaseUser.uid
+            user.uid = firebaseUser.uid
             let database = Firestore.firestore()
             do {
-                try await database.collection("users").addDocument(data: ["username":username, "email":email, "password":password, "birthdate":birthdate,  "uid":firebaseUID])
+                try await database.collection("users").addDocument(data: ["username":username, "email":email, "password":password, "birthdate":birthdate,  "uid":user.uid])
             } catch {
                 print("Failed to add user to database")
             }
@@ -165,9 +166,9 @@ extension SignUpView {
         let config = GIDConfiguration(clientID: clientID)
         GIDSignIn.sharedInstance.configuration = config
         
-        guard let windowScene = await UIApplication.shared.connectedScenes.first as? UIWindowScene,
-              let window = await windowScene.windows.first,
-              let rootVC = await window.rootViewController else {
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let window = windowScene.windows.first,
+              let rootVC = window.rootViewController else {
             print("There is no root vc")
             return
         }
@@ -181,10 +182,10 @@ extension SignUpView {
             do {
                 let firebaseResult = try await Auth.auth().signIn(with: credential)
                 let firebaseUser = firebaseResult.user
-                firebaseUID = firebaseUser.uid
+                user.uid = firebaseUser.uid
                 let database = Firestore.firestore()
                 do {
-                    try await database.collection("users").addDocument(data: ["username":googleUser.profile?.givenName, "email":googleUser.profile?.email,  "uid":firebaseUID])
+                    try await database.collection("users").addDocument(data: ["username":googleUser.profile?.givenName, "email":googleUser.profile?.email,  "uid":user.uid])
                 }
             } catch {
                 print("Firebase/Google sign in failed")

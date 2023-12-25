@@ -8,16 +8,16 @@
 import SwiftUI
 
 struct TutorialScreen1: View {
-    var uid: String
+    @EnvironmentObject var user: User
     
     var body: some View {
         NavigationStack {
-            Text(uid)
+            Text(user.uid)
         }
         .navigationBarBackButtonHidden(true)
     }
 }
 
 #Preview {
-    TutorialScreen1(uid: "uid")
+    TutorialScreen1()
 }

@@ -10,6 +10,9 @@ import SwiftUI
 struct HomeScreen: View {
     
     var body: some View {
+        
+        @StateObject var user = User()
+        
         NavigationStack {
     GeometryReader { geometry in
         ZStack {
@@ -60,6 +63,7 @@ struct HomeScreen: View {
     }
         }//nav stack
         .navigationBarBackButtonHidden(true)
+        .environmentObject(user)
     }
 }
 

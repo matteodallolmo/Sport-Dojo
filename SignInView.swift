@@ -15,7 +15,8 @@ struct SignInView: View {
     @State var email = ""
     @State var password = ""
     @State var isActive = false
-    @State var firebaseUID = ""
+    
+    @EnvironmentObject var user: User
     
     var body: some View {
         NavigationStack {
@@ -58,7 +59,7 @@ struct SignInView: View {
                         Button(action: {
                             Task {
                                 await signInWithEmail(email: email, password: password)
-                                if(firebaseUID != "") {
+                                if(user.uid != "") {
                                     isActive = true
                                 }
                             }
@@ -91,7 +92,7 @@ struct SignInView: View {
                             Button(action: {
                                 Task {
                                     await signInWithGoogle()
-                                    if(firebaseUID != "") {
+                                    if(user.uid != "") {
                                         isActive = true
                                     }
                                 }
@@ -117,7 +118,7 @@ struct SignInView: View {
         }
         .navigationBarBackButtonHidden(true)
         .navigationDestination(isPresented: $isActive) {
-            TutorialScreen1(uid: firebaseUID)
+            TutorialScreen1()
         }
     }
 }
@@ -128,7 +129,7 @@ extension SignInView {
         do {
             let result = try await Auth.auth().signIn(withEmail: email, password: password)
             let firebaseUser = result.user
-            firebaseUID = firebaseUser.uid
+            user.uid = firebaseUser.uid
         } catch {
             print("Failed to sign in")
         }
@@ -141,23 +142,24 @@ extension SignInView {
         let config = GIDConfiguration(clientID: clientID)
         GIDSignIn.sharedInstance.configuration = config
         
-        guard let windowScene = await UIApplication.shared.connectedScenes.first as? UIWindowScene,
-              let window = await windowScene.windows.first,
-              let rootVC = await window.rootViewController else {
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let window = windowScene.windows.first,
+              let rootVC = window.rootViewController else {
             print("There is no root vc")
             return
         }
         
         do {
             let googleResult = try await GIDSignIn.sharedInstance.signIn(withPresenting: rootVC)
-            let user = googleResult.user
-            let idTokenString = user.idToken?.tokenString
-            let accessTokenString = user.accessToken.tokenString
+            let googleUser = googleResult.user
+            let idTokenString = googleUser.idToken?.tokenString
+            let accessTokenString = googleUser.accessToken.tokenString
             let credential = GoogleAuthProvider.credential(withIDToken: idTokenString!, accessToken: accessTokenString)
             do {
                 let firebaseResult = try await Auth.auth().signIn(with: credential)
                 let firebaseUser = firebaseResult.user
-                firebaseUID = firebaseUser.uid
+                user.uid = firebaseUser.uid
+                
             } catch {
                 print("Firebase/Google sign in failed")
             }
