@@ -15,6 +15,7 @@ struct SignInView: View {
     @State var email = ""
     @State var password = ""
     @State var isActive = false
+    @State var firebaseUID = ""
     
     var body: some View {
         NavigationStack {
@@ -55,8 +56,10 @@ struct SignInView: View {
                             .frame(width: geometry.size.width * 0.9, height: geometry.size.height/20)
                         
                         Button(action: {
-                            isActive = true
-                            signInWithEmail(email: email, password: password)
+                            firebaseUID = signInWithEmail(email: email, password: password)
+                            if(firebaseUID != "") {
+                                isActive = true
+                            }
                         }, label: {
                             Text("SIGN IN")
                                 .font(.headline)
@@ -84,7 +87,10 @@ struct SignInView: View {
                             })
                             
                             Button(action: {
-                                signInWithGoogle()
+                                firebaseUID = signInWithGoogle()
+                                if(firebaseUID != "") {
+                                    isActive = true
+                                }
                             }, label: {
                                 Image("Google")
                                     .frame(width: geometry.size.width/5, height: geometry.size.height/12)
@@ -104,59 +110,74 @@ struct SignInView: View {
                     }
                 }.position(x: geometry.size.width / 2, y: geometry.size.height/2.75)
             }
-        }.navigationBarBackButtonHidden(true)
-    }
-}
-
-func signInWithEmail(email: String, password: String) {
-    Auth.auth().signIn(withEmail: email, password: password) { (result, error) in
-        
-        if error != nil {
-            print(error?.localizedDescription ?? "")
         }
-        else if(result != nil) {
-            print(result!.user.email! as String)
-        }
-        else {
-            print("result is nil")
+        .navigationBarBackButtonHidden(true)
+        .navigationDestination(isPresented: $isActive) {
+            HomeScreen()
         }
     }
 }
 
-func signInWithGoogle() {
-    guard let clientID = FirebaseApp.app()?.options.clientID else {
-        fatalError("No client ID found")
-    }
-    let config = GIDConfiguration(clientID: clientID)
-    GIDSignIn.sharedInstance.configuration = config
+extension SignInView {
     
-    guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-          let window = windowScene.windows.first,
-          let rootVC = window.rootViewController else {
-        print("There is no root vc")
-        return
-    }
+    func signInWithEmail(email: String, password: String) -> String {
+        var firebaseUID = ""
         
-    GIDSignIn.sharedInstance.signIn(withPresenting: rootVC) { result, error in
-        if(error != nil) {
-            print(error!.localizedDescription)
-        }
-        else if(result != nil) {
-            let user = result!.user
-            let idTokenString = user.idToken?.tokenString
-            let accessTokenString = user.accessToken.tokenString
-            let credential = GoogleAuthProvider.credential(withIDToken: idTokenString!, accessToken: accessTokenString)
+        Auth.auth().signIn(withEmail: email, password: password) { (result, error) in
             
-            Auth.auth().signIn(with: credential) { result, error in
-                if(error != nil) {
-                    print(error!.localizedDescription)
-                }
-                else if(result != nil) {
-                    let firebaseUser = result!.user
-                    let firebaseUID = firebaseUser.uid
+            if error != nil {
+                print(error?.localizedDescription ?? "")
+            }
+            else if(result != nil) {
+                let firebaseUser = result!.user
+                firebaseUID = firebaseUser.uid
+            }
+            else {
+                print("result is nil")
+            }
+        }
+        return firebaseUID
+    }
+    
+    func signInWithGoogle() -> String {
+        var firebaseUID = ""
+        
+        guard let clientID = FirebaseApp.app()?.options.clientID else {
+            fatalError("No client ID found")
+        }
+        let config = GIDConfiguration(clientID: clientID)
+        GIDSignIn.sharedInstance.configuration = config
+        
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let window = windowScene.windows.first,
+              let rootVC = window.rootViewController else {
+            print("There is no root vc")
+            return firebaseUID
+        }
+        
+        GIDSignIn.sharedInstance.signIn(withPresenting: rootVC) { result, error in
+            if(error != nil) {
+                print(error!.localizedDescription)
+            }
+            else if(result != nil) {
+                let user = result!.user
+                let idTokenString = user.idToken?.tokenString
+                let accessTokenString = user.accessToken.tokenString
+                let credential = GoogleAuthProvider.credential(withIDToken: idTokenString!, accessToken: accessTokenString)
+                
+                Auth.auth().signIn(with: credential) { result, error in
+                    if(error != nil) {
+                        print(error!.localizedDescription)
+                    }
+                    else if(result != nil) {
+                        let firebaseUser = result!.user
+                        firebaseUID = firebaseUser.uid
+                    }
                 }
             }
         }
+        
+        return firebaseUID
     }
 }
 

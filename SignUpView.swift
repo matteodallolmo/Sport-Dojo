@@ -19,6 +19,7 @@ struct SignUpView: View {
     @State var username = ""
     @State var birthdate = Date()
     @State var isActive = false
+    @State var firebaseUID = ""
     
     var body: some View {
         NavigationStack {
@@ -73,8 +74,10 @@ struct SignUpView: View {
                             .frame(width: geometry.size.width * 0.9, height: geometry.size.height/20)
                         
                         Button(action: {
-                            isActive = true
-                            signUpWithEmail(username: username, email: email, password: password, birthdate: birthdate)
+                            firebaseUID = signUpWithEmail(username: username, email: email, password: password, birthdate: birthdate)
+                            if(firebaseUID != "") {
+                                isActive = true
+                            }
                         }, label: {
                             Text("CREATE ACCOUNT")
                                 .font(.headline)
@@ -102,7 +105,10 @@ struct SignUpView: View {
                             })
                             
                             Button(action: {
-                                signUpWithGoogle()
+                                firebaseUID = signUpWithGoogle()
+                                if(firebaseUID != "") {
+                                    isActive = true
+                                }
                             }, label: {
                                 Image("Google")
                                     .frame(width: geometry.size.width/5, height: geometry.size.height/12)
@@ -122,67 +128,82 @@ struct SignUpView: View {
                     }
                 }.position(x: geometry.size.width / 2, y: geometry.size.height/2.2)
             }
-        }.navigationBarBackButtonHidden(true)
-    }
-}
-
-func signUpWithEmail(username: String, email: String, password: String, birthdate: Date) {
-    
-    Auth.auth().createUser(withEmail: email, password: password) { (result, err) in
-        
-        if(err != nil)
-        {
-            print(err!.localizedDescription)
         }
-        else
-        {
-            let database = Firestore.firestore()
-            database.collection("users").addDocument(data: ["username":username, "email":email, "password":password, "birthdate":birthdate,  "uid":result!.user.uid]) { (error) in
-                if(error != nil)
-                {
-                    print("Account made successfully, but user data couldn't be saved")
-                }
-            }
-            
-            //TRANSITION TO NEXT SCREEN
+        .navigationBarBackButtonHidden(true)
+        .navigationDestination(isPresented: $isActive) {
+            HomeScreen()
         }
     }
 }
 
-func signUpWithGoogle() {
-    guard let clientID = FirebaseApp.app()?.options.clientID else {
-        fatalError("No client ID found")
-    }
-    let config = GIDConfiguration(clientID: clientID)
-    GIDSignIn.sharedInstance.configuration = config
+extension SignUpView {
     
-    guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-          let window = windowScene.windows.first,
-          let rootVC = window.rootViewController else {
-        print("There is no root vc")
-        return
-    }
+    func signUpWithEmail(username: String, email: String, password: String, birthdate: Date) -> String {
+        var firebaseUID = ""
         
-    GIDSignIn.sharedInstance.signIn(withPresenting: rootVC) { result, error in
-        if(error != nil) {
-            print(error!.localizedDescription)
-        }
-        else if(result != nil) {
-            let user = result!.user
-            let idTokenString = user.idToken?.tokenString
-            let accessTokenString = user.accessToken.tokenString
-            let credential = GoogleAuthProvider.credential(withIDToken: idTokenString!, accessToken: accessTokenString)
+        Auth.auth().createUser(withEmail: email, password: password) { (result, err) in
             
-            Auth.auth().signIn(with: credential) { result, error in
-                if(error != nil) {
-                    print(error!.localizedDescription)
-                }
-                else if(result != nil) {
-                    //let firebaseUser = result!.user
-                    //let firebaseUID = firebaseUser.uid
+            if(err != nil)
+            {
+                print(err!.localizedDescription)
+            }
+            else if(result != nil)
+            {
+                let database = Firestore.firestore()
+                database.collection("users").addDocument(data: ["username":username, "email":email, "password":password, "birthdate":birthdate,  "uid":result!.user.uid]) { (error) in
+                    if(error != nil)
+                    {
+                        print("Account made successfully, but user data couldn't be saved")
+                    }
+                    else {
+                        firebaseUID = result!.user.uid
+                    }
                 }
             }
         }
+        
+        return firebaseUID
+    }
+    
+    func signUpWithGoogle() -> String {
+        var firebaseUID = ""
+        
+        guard let clientID = FirebaseApp.app()?.options.clientID else {
+            fatalError("No client ID found")
+        }
+        let config = GIDConfiguration(clientID: clientID)
+        GIDSignIn.sharedInstance.configuration = config
+        
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let window = windowScene.windows.first,
+              let rootVC = window.rootViewController else {
+            print("There is no root vc")
+            return firebaseUID
+        }
+        
+        GIDSignIn.sharedInstance.signIn(withPresenting: rootVC) { result, error in
+            if(error != nil) {
+                print(error!.localizedDescription)
+            }
+            else if(result != nil) {
+                let user = result!.user
+                let idTokenString = user.idToken?.tokenString
+                let accessTokenString = user.accessToken.tokenString
+                let credential = GoogleAuthProvider.credential(withIDToken: idTokenString!, accessToken: accessTokenString)
+                
+                Auth.auth().signIn(with: credential) { result, error in
+                    if(error != nil) {
+                        print(error!.localizedDescription)
+                    }
+                    else if(result != nil) {
+                        let firebaseUser = result!.user
+                        firebaseUID = firebaseUser.uid
+                    }
+                }
+            }
+        }
+        
+        return firebaseUID
     }
 }
 
