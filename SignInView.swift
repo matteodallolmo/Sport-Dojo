@@ -25,7 +25,7 @@ struct SignInView: View {
                     VStack(spacing: geometry.size.height/10) {
                         HStack {
                             NavigationLink {
-                                HomeScreen()
+                                StartScreen()
                             } label: {
                                 Image(systemName: "chevron.backward")
                                     .foregroundColor(Color.black)
@@ -38,7 +38,7 @@ struct SignInView: View {
                             } label: {
                                 Text("Create Account")
                                     .fontWeight(.medium)
-                                    .foregroundColor(Color.black)
+                                    .foregroundColor(Color(red: 8/255, green: 73/255, blue: 30/255))
                             }
                         }.frame(width: geometry.size.width * 0.85)
                         
@@ -118,7 +118,9 @@ struct SignInView: View {
         }
         .navigationBarBackButtonHidden(true)
         .navigationDestination(isPresented: $isActive) {
-            TutorialScreen1()
+            if(!user.tutorialCompleted) {
+                TutorialScreen1()
+            }
         }
     }
 }

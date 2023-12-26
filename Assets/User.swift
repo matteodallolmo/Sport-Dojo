@@ -9,4 +9,5 @@ import Foundation
 
 class User : ObservableObject {
     @Published var uid: String = ""
+    @Published var tutorialCompleted = false
 }

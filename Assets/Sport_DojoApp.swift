@@ -23,7 +23,7 @@ struct Sport_DojoApp: App {
     
     var body: some Scene {
         WindowGroup {
-            HomeScreen()
+            StartScreen()
         }
     }
 }

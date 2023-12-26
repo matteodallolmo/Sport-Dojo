@@ -29,7 +29,7 @@ struct SignUpView: View {
                     VStack(spacing: geometry.size.height/16) {
                         HStack {
                             NavigationLink {
-                                HomeScreen()
+                                StartScreen()
                             } label: {
                                 Image(systemName: "chevron.backward")
                                     .foregroundColor(Color.black)
@@ -42,7 +42,7 @@ struct SignUpView: View {
                             } label: {
                                 Text("Sign In")
                                     .fontWeight(.medium)
-                                    .foregroundColor(Color.black)
+                                    .foregroundColor(Color(red: 8/255, green: 73/255, blue: 30/255))
                             }
                         }.frame(width: geometry.size.width * 0.85)
                         

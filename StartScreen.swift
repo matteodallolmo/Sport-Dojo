@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct HomeScreen: View {
+struct StartScreen: View {
     
     @StateObject var user = User()
     
@@ -67,5 +67,5 @@ struct HomeScreen: View {
 }
 
 #Preview {
-    HomeScreen()
+    StartScreen()
 }
