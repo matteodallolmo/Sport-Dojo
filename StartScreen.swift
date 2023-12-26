@@ -21,7 +21,7 @@ struct StartScreen: View {
                 .saturation(1.2)
             
             VStack {
-                Image("LOGO")
+                Image("LoadingScreenLogo")
                     .resizable()
                     .frame(width: geometry.size.width/1.6, height: geometry.size.width/2.8)
                 

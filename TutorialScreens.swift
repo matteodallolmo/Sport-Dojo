@@ -38,12 +38,10 @@ struct TutorialScreen1: View {
                                 .foregroundStyle(.black)
                         }
                         .padding()
-                        .offset(y: geometry.size.height/6)
-                    }
-                    .position(x: geometry.size.width/2)
+                    }.offset(y: geometry.size.height/8)
                 }
                 .navigationBarBackButtonHidden(true)
-                .position(x: geometry.size.width/2, y: geometry.size.height/1.9)
+                .position(x: geometry.size.width/2, y: geometry.size.height/2.5)
             }
         }
     }
@@ -131,5 +129,6 @@ struct TutorialScreen3: View {
 
 
 #Preview {
-    TutorialScreen1()
+    TutorialScreen2()
 }
+

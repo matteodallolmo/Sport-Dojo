@@ -24,8 +24,7 @@ struct TabBarView: View {
                         Image("Home")
                             .resizable()
                             .aspectRatio(contentMode: .fit)
-                            .foregroundColor(viewRouter.currentView == "home" ? .black : .gray)
-                            .opacity(viewRouter.currentView == "home" ? 100 : 50)
+                            .opacity(viewRouter.currentView == "home" ? 1 : 0.5)
                     })
                     
                     //Dashboard image
@@ -36,8 +35,7 @@ struct TabBarView: View {
                         Image("Dashboard")
                             .resizable()
                             .aspectRatio(contentMode: .fit)
-                            .foregroundColor(viewRouter.currentView == "dash" ? .black : .gray)
-                            .opacity(viewRouter.currentView == "dash" ? 100 : 50)
+                            .opacity(viewRouter.currentView == "dash" ? 1 : 0.5)
                     })
                     
                     //Dashboard image
@@ -48,8 +46,7 @@ struct TabBarView: View {
                         Image("Learning")
                             .resizable()
                             .aspectRatio(contentMode: .fit)
-                            .foregroundColor(viewRouter.currentView == "learn" ? .black : .gray)
-                            .opacity(viewRouter.currentView == "learn" ? 100 : 50)
+                            .opacity(viewRouter.currentView == "learn" ? 1 : 0.5)
                     })
                     
                     //Dashboard image
@@ -60,8 +57,7 @@ struct TabBarView: View {
                         Image("Network")
                             .resizable()
                             .aspectRatio(contentMode: .fit)
-                            .foregroundColor(viewRouter.currentView == "network" ? .black : .gray)
-                            .opacity(viewRouter.currentView == "network" ? 100 : 50)
+                            .opacity(viewRouter.currentView == "network" ? 1 : 0.5)
                     })
                     
                     //Dashboard image
@@ -72,8 +68,7 @@ struct TabBarView: View {
                         Image("Profile")
                             .resizable()
                             .aspectRatio(contentMode: .fit)
-                            .foregroundColor(viewRouter.currentView == "profile" ? .black : .gray)
-                            .opacity(viewRouter.currentView == "profile" ? 100 : 50)
+                            .opacity(viewRouter.currentView == "profile" ? 1 : 0.5)
                     })
                 }//HStack end
             }
