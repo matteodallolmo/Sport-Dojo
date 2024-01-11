@@ -38,7 +38,7 @@ struct TabBarView: View {
                             .opacity(viewRouter.currentView == "dash" ? 1 : 0.5)
                     })
                     
-                    //Dashboard image
+                    //Learning image
                     Button(action: {
                         viewRouter.previousView = viewRouter.currentView
                         viewRouter.currentView = "learn"
@@ -49,7 +49,7 @@ struct TabBarView: View {
                             .opacity(viewRouter.currentView == "learn" ? 1 : 0.5)
                     })
                     
-                    //Dashboard image
+                    //Network image
                     Button(action: {
                         viewRouter.previousView = viewRouter.currentView
                         viewRouter.currentView = "network"
@@ -60,7 +60,7 @@ struct TabBarView: View {
                             .opacity(viewRouter.currentView == "network" ? 1 : 0.5)
                     })
                     
-                    //Dashboard image
+                    //Profile image
                     Button(action: {
                         viewRouter.previousView = viewRouter.currentView
                         viewRouter.currentView = "profile"

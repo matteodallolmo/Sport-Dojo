@@ -22,28 +22,34 @@ struct ViewController: View {
                     
                     TabBarView(viewRouter: viewRouter)
                 }
-                else {
+                else if(viewRouter.currentView == "dash") {
+                    Text("Dashboard")
+                    
                     Spacer()
                     
                     TabBarView(viewRouter: viewRouter)
                 }
-                /*else if(self.viewRouter.currentView == "log")
-                 {
-                 LogView()
-                 
-                 Spacer()
-                 
-                 TabBarView(viewRouter: self.viewRouter)
-                 .edgesIgnoringSafeArea(.bottom)
-                 }
-                 else if(self.viewRouter.currentView == "addIncome")
-                 {
-                 AddIncomeView(viewRouter: self.viewRouter, geometry: geometry)
-                 }
-                 else
-                 {
-                 AddExpenseView(viewRouter: self.viewRouter, geometry: geometry)
-                 }*/
+                else if(viewRouter.currentView == "learn") {
+                    Text("Learning Module")
+                    
+                    Spacer()
+                    
+                    TabBarView(viewRouter: viewRouter)
+                }
+                else if(viewRouter.currentView == "network") {
+                    Text("Network")
+                    
+                    Spacer()
+                    
+                    TabBarView(viewRouter: viewRouter)
+                }
+                else {
+                    Text("Profile")
+                    
+                    Spacer()
+                    
+                    TabBarView(viewRouter: viewRouter)
+                }
             }
         }
     }
