@@ -10,6 +10,7 @@ import SwiftUI
 struct StartScreen: View {
     
     @StateObject var user = User()
+    //@StateObject var storeManager: EventStoreManager = EventStoreManager()
     
     var body: some View {
         NavigationStack {
