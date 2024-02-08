@@ -8,8 +8,15 @@
 import SwiftUI
 
 struct HomeView: View {
+    @EnvironmentObject var storeManager: EventStoreManager
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        VStack {
+            CalendarView()
+                .task {
+                    await storeManager.listenForCalendarChanges()
+                }
+        }
     }
 }
 

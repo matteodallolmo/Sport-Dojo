@@ -89,6 +89,12 @@ struct TutorialScreen2: View {
 }
 
 struct TutorialScreen3: View {
+    //@EnvironmentObject var user: User
+    /*
+     Need to add a "finishedTutorial" bool for every user that determines whether
+     they see the tutorial at the beginning
+     */
+
     var body: some View {
         GeometryReader { geometry in
             NavigationStack {

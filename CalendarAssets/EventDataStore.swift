@@ -24,11 +24,14 @@ actor EventDataStore {
     /// Prompts the user for full-access authorization to Calendar.
     private func requestFullAccess() async throws -> Bool {
         if #available(iOS 17.0, *) {
-            return try await eventStore.requestFullAccessToEvents()
+            Task.detached(operation: {
+                return try await self.eventStore.requestFullAccessToEvents()
+            })
         } else {
             // Fall back on earlier versions.
             return try await eventStore.requestAccess(to: .event)
         }
+        return false;
     }
     
     /// Verifies the authorization status for the app.
@@ -53,10 +56,15 @@ actor EventDataStore {
     /// Fetches all events occuring within a month in all the user's calendars.
     func fetchEvents() -> [EKEvent] {
         guard isFullAccessAuthorized else { return [] }
+        let secondsInADay: TimeInterval = 60 * 60 * 24
+        let thirtyDaysInSeconds: TimeInterval = 30 * secondsInADay
         let start = Date.now
-        let end = start.oneMonthOut
+        let end = start.advanced(by: thirtyDaysInSeconds)
         let predicate = eventStore.predicateForEvents(withStart: start, end: end, calendars: nil)
-        return eventStore.events(matching: predicate).sortedEventByAscendingDate()
+        let sortedEvents = eventStore.events(matching: predicate).sorted { (event1, event2) -> Bool in
+            return event1.startDate < event2.startDate
+        }
+        return sortedEvents
     }
     
     /// Removes an event.
