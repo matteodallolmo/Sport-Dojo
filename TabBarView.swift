@@ -70,7 +70,8 @@ struct TabBarView: View {
                             .aspectRatio(contentMode: .fit)
                             .opacity(viewRouter.currentView == "profile" ? 1 : 0.5)
                     })
-                }//HStack end
+                }
+                //HStack end
             }
         }
 }//body end

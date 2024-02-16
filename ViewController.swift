@@ -51,6 +51,7 @@ struct ViewController: View {
                     TabBarView(viewRouter: viewRouter)
                 }
             }
+            .navigationBarBackButtonHidden(true)
         }
     }
 }

@@ -115,15 +115,15 @@ struct SignInView: View {
                     }
                 }.position(x: geometry.size.width / 2, y: geometry.size.height/2.75)
             }
-        }
+        }//nav stack
         .navigationBarBackButtonHidden(true)
         .navigationDestination(isPresented: $isActive) {
             if(!user.tutorialCompleted) {
                 TutorialScreen1()
             }
         }
-    }
-}
+    }//body
+}//struct
 
 extension SignInView {
     

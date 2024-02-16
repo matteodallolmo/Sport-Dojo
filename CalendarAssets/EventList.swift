@@ -5,6 +5,7 @@ A view to display and delete monthly events.
 
 import SwiftUI
 import EventKit
+import EventKitUI
 
 struct EventList: View {
     @EnvironmentObject var storeManager: EventStoreManager
@@ -13,6 +14,7 @@ struct EventList: View {
     @State private var alertTitle: String?
     @State var selection: Set<EKEvent> = []
     @State var editMode: EditMode = .inactive
+    @State var showEventEditViewController = false
     
     /*
         Displays a list of events that occur within this month in all the user's calendars. Removes an event from Calendar when the user deletes it
@@ -46,8 +48,29 @@ struct EventList: View {
                     .toolbar(content: toolbarContent)
                     .environment(\.editMode, $editMode)
                 }
+                
+                Spacer()
+                
+                Button(action: {
+                    showEventEditViewController = true
+                    
+                }, label: {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 20)
+                            .frame(width: 300, height: 50)
+                            .foregroundStyle(.blue)
+                        
+                        Text("Add Event")
+                            .foregroundStyle(.white)
+                    }
+                })
             }
             .alertErrorMessage(message: alertMessage, title: alertTitle, isPresented: $shouldPresentError)
+            .sheet(isPresented: $showEventEditViewController, onDismiss: {
+                showEventEditViewController = false
+            }, content: {
+                EventEditViewController(eventStore: storeManager.store)
+            })
     }
     
     /// Delete the selected event from Calendar.
