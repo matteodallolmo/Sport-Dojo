@@ -53,7 +53,7 @@ struct SignUpView: View {
                     
                         
                     VStack(spacing: 20) {
-                        TextField("Username", text: $username)
+                        TextField("Name", text: $username)
                             .textFieldStyle(.roundedBorder)
                             .frame(width: geometry.size.width * 0.9, height: geometry.size.height/20)
                         
@@ -76,9 +76,14 @@ struct SignUpView: View {
                         
                         Button(action: {
                             Task {
-                                await signUpWithEmail(username: username, email: email, password: password, birthdate: birthdate)
-                                if(user.uid != "") {
-                                    isActive = true
+                                if(password == confirmPassword) {
+                                    await signUpWithEmail(username: username, email: email, password: password, birthdate: birthdate)
+                                    if(user.uid != "") {
+                                        isActive = true
+                                    }
+                                }
+                                else {
+                                    print("Passwords don't match")
                                 }
                             }
                         }, label: {
@@ -148,6 +153,10 @@ extension SignUpView {
             let result = try await Auth.auth().createUser(withEmail: email, password: password)
             let firebaseUser = result.user
             user.uid = firebaseUser.uid
+            user.birthdate = birthdate
+            user.password = password
+            user.email = email
+            user.username = username
             let database = Firestore.firestore()
             do {
                 try await database.collection("users").addDocument(data: ["username":username, "email":email, "password":password, "birthdate":birthdate,  "uid":user.uid])
@@ -183,9 +192,14 @@ extension SignUpView {
                 let firebaseResult = try await Auth.auth().signIn(with: credential)
                 let firebaseUser = firebaseResult.user
                 user.uid = firebaseUser.uid
+                user.email = googleUser.profile!.email
+                user.username = googleUser.profile!.givenName!
                 let database = Firestore.firestore()
                 do {
-                    try await database.collection("users").addDocument(data: ["username":googleUser.profile!.givenName as Any, "email":googleUser.profile!.email as Any,  "uid":user.uid])
+                    let snapshot = try await database.collection("users").whereField("uid", isEqualTo: user.uid).getDocuments()
+                    if(snapshot.count == 0) {
+                        try await database.collection("users").addDocument(data: ["username":googleUser.profile!.givenName as Any, "email":googleUser.profile!.email as Any,  "uid":user.uid])
+                    }
                 }
             } catch {
                 print("Firebase/Google sign in failed")

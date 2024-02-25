@@ -44,7 +44,7 @@ struct ViewController: View {
                     TabBarView(viewRouter: viewRouter)
                 }
                 else {
-                    Text("Profile")
+                    ProfileView()
                     
                     Spacer()
                     

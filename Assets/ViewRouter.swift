@@ -8,7 +8,6 @@
 import Foundation
 
 class ViewRouter : ObservableObject {
-    
     @Published var currentView : String = "home"
     @Published var previousView: String = ""
 }

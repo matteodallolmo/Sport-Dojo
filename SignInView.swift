@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Firebase
 import FirebaseAuth
 import FirebaseCore
 import GoogleSignIn
@@ -132,6 +133,15 @@ extension SignInView {
             let result = try await Auth.auth().signIn(withEmail: email, password: password)
             let firebaseUser = result.user
             user.uid = firebaseUser.uid
+            user.password = password
+            user.email = email
+            let database = Firestore.firestore()
+            let snapshot = try await database.collection("users").whereField("uid", isEqualTo: user.uid).getDocuments()
+            for doc in snapshot.documents {
+                let docData = doc.data()
+                user.birthdate = (docData["birthdate"] as! Date)
+                user.username = docData["username"] as! String
+            }
         } catch {
             print("Failed to sign in")
         }
@@ -161,7 +171,20 @@ extension SignInView {
                 let firebaseResult = try await Auth.auth().signIn(with: credential)
                 let firebaseUser = firebaseResult.user
                 user.uid = firebaseUser.uid
-                
+                user.email = googleUser.profile!.email
+                do {
+                    let database = Firestore.firestore()
+                    let snapshot = try await database.collection("users").whereField("uid", isEqualTo: user.uid).getDocuments()
+                    if(snapshot.count == 0) {
+                        try await database.collection("users").addDocument(data: ["username":googleUser.profile!.givenName as Any, "email":googleUser.profile!.email as Any,  "uid":user.uid])
+                    }
+                    else {
+                        for doc in snapshot.documents {
+                            let docData = doc.data()
+                            user.username = docData["username"] as! String
+                        }
+                    }
+                }
             } catch {
                 print("Firebase/Google sign in failed")
             }

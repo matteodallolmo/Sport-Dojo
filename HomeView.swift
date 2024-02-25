@@ -8,12 +8,18 @@
 import SwiftUI
 
 struct HomeView: View {
+    @EnvironmentObject var user: User
     @EnvironmentObject var storeManager: EventStoreManager
     @State var isActive = false
     
     var body: some View {
         NavigationStack {
-            VStack(spacing: 30) {
+            VStack(alignment: .leading, spacing: 30) {
+                Text("Welcome "+user.username)
+                    .foregroundColor(Color.black)
+                    .font(.title)
+                    .fontWeight(.bold)
+                
                 ZStack(alignment: .topLeading) {
                     RoundedRectangle(cornerRadius: 10)
                         .fill(Color.clear)
@@ -22,12 +28,10 @@ struct HomeView: View {
                                 .stroke(Color.black, lineWidth: 1)
                         )
                         .frame(width: 300, height: 70)
-                    VStack(alignment: .leading) {
-                        Text("My Course")
-                            .font(.headline)
-                            .foregroundColor(Color.black)
-                            .padding(10)
-                    }
+                    Text("My Course")
+                        .font(.headline)
+                        .foregroundColor(Color.black)
+                        .padding(10)
                 }
                 
                 ZStack(alignment: .topLeading) {
@@ -38,12 +42,10 @@ struct HomeView: View {
                                 .stroke(Color.black, lineWidth: 1)
                         )
                         .frame(width: 300, height: 70)
-                    
                     Text("My Squads")
                         .font(.headline)
                         .foregroundColor(Color.black)
                         .padding(10)
-                    
                 }
                 
                 Button(action: {
