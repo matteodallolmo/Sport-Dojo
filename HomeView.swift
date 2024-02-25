@@ -92,6 +92,7 @@ struct HomeView: View {
                     await storeManager.listenForCalendarChanges()
                 }
         }
+        .frame(minHeight: 0, maxHeight: .infinity, alignment: .top)
     }
 }
 

@@ -17,8 +17,7 @@ struct ViewController: View {
                 if(viewRouter.currentView == "home")
                 {
                     HomeView()
-                    
-                    Spacer()
+                        .frame(minHeight: 0, maxHeight: .infinity, alignment: .top)
                     
                     TabBarView(viewRouter: viewRouter)
                 }
@@ -45,12 +44,12 @@ struct ViewController: View {
                 }
                 else {
                     ProfileView()
-                    
-                    Spacer()
-                    
+                        .frame(minHeight: 0, maxHeight: .infinity, alignment: .top)
+
                     TabBarView(viewRouter: viewRouter)
                 }
             }
+            .edgesIgnoringSafeArea(.bottom)
             .navigationBarBackButtonHidden(true)
         }
     }

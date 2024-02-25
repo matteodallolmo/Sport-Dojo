@@ -23,127 +23,129 @@ struct SignUpView: View {
     @EnvironmentObject var user: User
     
     var body: some View {
-        NavigationStack {
-            GeometryReader { geometry in
-                VStack(spacing: geometry.size.height/9) {
-                    VStack(spacing: geometry.size.height/16) {
-                        HStack {
-                            NavigationLink {
-                                StartScreen()
-                            } label: {
-                                Image(systemName: "chevron.backward")
-                                    .foregroundColor(Color.black)
-                            }
-                            
-                            Spacer()
-                            
-                            NavigationLink {
-                                SignInView()
-                            } label: {
-                                Text("Sign In")
-                                    .fontWeight(.medium)
-                                    .foregroundColor(Color(red: 8/255, green: 73/255, blue: 30/255))
-                            }
-                        }.frame(width: geometry.size.width * 0.85)
-                        
-                        Text("CREATE ACCOUNT")
-                            .font(.largeTitle)
-                            .fontWeight(.medium)
-                    }
-                    
-                        
-                    VStack(spacing: 20) {
+        VStack {
+            HStack {
+                NavigationLink {
+                    StartScreen()
+                } label: {
+                    Image(systemName: "chevron.backward")
+                        .foregroundColor(Color.black)
+                }
+                
+                Spacer()
+                
+                NavigationLink {
+                    SignInView()
+                } label: {
+                    Text("Sign In")
+                        .fontWeight(.medium)
+                        .foregroundColor(Color(red: 8/255, green: 73/255, blue: 30/255))
+                }
+            }
+            
+            Text("SIGN UP")
+                .font(.largeTitle)
+                .fontWeight(.medium)
+                .padding()
+            
+            VStack {
+                NavigationStack {
+                    VStack {
                         TextField("Name", text: $username)
                             .textFieldStyle(.roundedBorder)
-                            .frame(width: geometry.size.width * 0.9, height: geometry.size.height/20)
+                            .padding(.vertical)
                         
                         TextField("Email", text: $email)
                             .textFieldStyle(.roundedBorder)
-                            .frame(width: geometry.size.width * 0.9, height: geometry.size.height/20)
+                            .padding(.vertical)
                         
                         DatePicker("Birth Date", selection: $birthdate, displayedComponents: .date)
-                            .frame(width: geometry.size.width * 0.9, height: geometry.size.height/20)
+                            .frame(maxWidth: .infinity)
                             .foregroundColor(.gray)
                         
                         TextField("Password", text: $password)
                             .textFieldStyle(.roundedBorder)
-                            .frame(width: geometry.size.width * 0.9, height: geometry.size.height/20)
-                            .foregroundColor(/*@START_MENU_TOKEN@*/.blue/*@END_MENU_TOKEN@*/)
+                            .padding(.vertical)
                         
                         TextField("Confirm Password", text: $confirmPassword)
                             .textFieldStyle(.roundedBorder)
-                            .frame(width: geometry.size.width * 0.9, height: geometry.size.height/20)
+                            .padding(.vertical)
+                    }
+                    .padding(.horizontal)
+                    
+                    Text("or continue with")
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(.gray)
+                    
+                    HStack(spacing: 35) {
+                        
+                        Button(action: {
+                            //SIGN IN WITH FACEBOOK
+                        }, label: {
+                            Image("Facebook")
+                                .padding()
+                                .frame(maxWidth: .infinity)
+                                .background(RoundedRectangle(cornerRadius: 15)
+                                    .stroke(.gray.opacity(0.8), lineWidth: 1))
+                        })
                         
                         Button(action: {
                             Task {
-                                if(password == confirmPassword) {
-                                    await signUpWithEmail(username: username, email: email, password: password, birthdate: birthdate)
-                                    if(user.uid != "") {
-                                        isActive = true
-                                    }
-                                }
-                                else {
-                                    print("Passwords don't match")
-                                }
+                                await signUpWithGoogle()
                             }
                         }, label: {
-                            Text("CREATE ACCOUNT")
-                                .font(.headline)
-                                .fontWeight(.heavy)
-                                .frame(width: geometry.size.width * 0.9, height: geometry.size.height/15)
-                                .background(LinearGradient(colors: [.cyan, .green], startPoint: .leading, endPoint: .trailing))
-                                .cornerRadius(40)
-                                .foregroundColor(.white)
-                                .saturation(0.8)
+                            Image("Google")
+                                .padding()
+                                .frame(maxWidth: .infinity)
+                                .background(RoundedRectangle(cornerRadius: 15)
+                                    .stroke(.gray.opacity(0.8), lineWidth: 1))
                         })
                         
-                        Text("or continue with")
-                            .multilineTextAlignment(.center)
-                            .foregroundColor(.gray)
-                        
-                        HStack(spacing: 35) {
-                            
-                            Button(action: {
-                                //SIGN IN WITH FACEBOOK
-                            }, label: {
-                                Image("Facebook")
-                                    .frame(width: geometry.size.width/5, height: geometry.size.height/12)
-                                    .background(RoundedRectangle(cornerRadius: 15)
-                                        .stroke(.gray.opacity(0.8), lineWidth: 1))
-                            })
-                            
-                            Button(action: {
-                                Task {
-                                    await signUpWithGoogle()
-                                    if(user.uid != "") {
-                                        isActive = true
-                                    }
-                                }
-                            }, label: {
-                                Image("Google")
-                                    .frame(width: geometry.size.width/5, height: geometry.size.height/12)
-                                    .background(RoundedRectangle(cornerRadius: 15)
-                                        .stroke(.gray.opacity(0.8), lineWidth: 1))
-                            })
-                            
-                            Button(action: {
-                                //SIGN IN WITH APPLE
-                            }, label: {
-                                Image("Apple")
-                                    .frame(width: geometry.size.width/5, height: geometry.size.height/12)
-                                    .background(RoundedRectangle(cornerRadius: 15)
-                                        .stroke(.gray.opacity(0.8), lineWidth: 1))
-                            })
+                        Button(action: {
+                            //SIGN IN WITH APPLE
+                        }, label: {
+                            Image("Apple")
+                                .padding()
+                                .frame(maxWidth: .infinity)
+                                .background(RoundedRectangle(cornerRadius: 15)
+                                    .stroke(.gray.opacity(0.8), lineWidth: 1))
+                        })
+                    }.padding(.horizontal)
+                }//nav stack
+                .navigationBarBackButtonHidden(true)
+                .navigationDestination(isPresented: $isActive) {
+                    if(!user.tutorialCompleted) {
+                        TutorialScreen1()
+                    }
+                }
+            }
+            .frame(minHeight: 0, maxHeight: .infinity, alignment: .top)
+            
+            Button(action: {
+                Task {
+                    if(password == confirmPassword) {
+                        await signUpWithEmail(username: username, email: email, password: password, birthdate: birthdate)
+                        if(user.uid != "") {
+                            isActive = true
                         }
                     }
-                }.position(x: geometry.size.width / 2, y: geometry.size.height/2.2)
-            }
-        }
-        .navigationBarBackButtonHidden(true)
-        .navigationDestination(isPresented: $isActive) {
-            TutorialScreen1()
-        }
-    }
+                    else {
+                        print("Passwords don't match")
+                    }
+                }
+            }, label: {
+                Text("CREATE ACCOUNT")
+                    .padding()
+                    .font(.headline)
+                    .fontWeight(.heavy)
+                    .frame(maxWidth: .infinity)
+                    .background(LinearGradient(colors: [.cyan, .green], startPoint: .leading, endPoint: .trailing))
+                    .cornerRadius(40)
+                    .foregroundColor(.white)
+                    .saturation(0.8)
+            })
+        }.padding()
+    }//body
 }
 
 extension SignUpView {
@@ -195,14 +197,13 @@ extension SignUpView {
                 user.email = googleUser.profile!.email
                 user.username = googleUser.profile!.givenName!
                 let database = Firestore.firestore()
-                do {
-                    let snapshot = try await database.collection("users").whereField("uid", isEqualTo: user.uid).getDocuments()
-                    if(snapshot.count == 0) {
-                        try await database.collection("users").addDocument(data: ["username":googleUser.profile!.givenName as Any, "email":googleUser.profile!.email as Any,  "uid":user.uid])
-                    }
+                let snapshot = try await database.collection("users").whereField("uid", isEqualTo: user.uid).getDocuments()
+                print("doc count: "+snapshot.count.formatted())
+                if(snapshot.count == 0) {
+                    try await database.collection("users").addDocument(data: ["username":googleUser.profile!.givenName as Any, "email":googleUser.profile!.email as Any,  "uid":user.uid])
                 }
             } catch {
-                print("Firebase/Google sign in failed")
+                print("Firebase/Google sign up failed")
             }
         } catch {
             print("Google token failed")
