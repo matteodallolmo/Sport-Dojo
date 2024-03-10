@@ -11,7 +11,6 @@ import EventKit
 struct CalendarView: View {
     @EnvironmentObject var storeManager: EventStoreManager
     @State private var shouldPresentError: Bool = false
-    
     @State private var alertMessage: String?
     @State private var alertTitle: String?
     
@@ -60,7 +59,6 @@ struct CalendarView: View {
         }
     }
     
-    /// Set up details of the alert message.
     func showError(_ error: Error, title: String) {
         alertTitle = title
         alertMessage = error.localizedDescription

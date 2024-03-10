@@ -25,18 +25,6 @@ struct TabBarView: View {
                         .aspectRatio(contentMode: .fit)
                         .opacity(viewRouter.currentView == "home" ? 1 : 0.5)
                 })
-                
-                //Dashboard image
-                Button(action: {
-                    viewRouter.previousView = viewRouter.currentView
-                    viewRouter.currentView = "dash"
-                }, label: {
-                    Image("Dashboard")
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .opacity(viewRouter.currentView == "dash" ? 1 : 0.5)
-                })
-                
                 //Learning image
                 Button(action: {
                     viewRouter.previousView = viewRouter.currentView

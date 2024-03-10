@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct ViewController: View {
-    
     @ObservedObject var viewRouter = ViewRouter()
     
     var body: some View {
@@ -18,13 +17,6 @@ struct ViewController: View {
                 {
                     HomeView()
                         .frame(minHeight: 0, maxHeight: .infinity, alignment: .top)
-                    
-                    TabBarView(viewRouter: viewRouter)
-                }
-                else if(viewRouter.currentView == "dash") {
-                    Text("Dashboard")
-                    
-                    Spacer()
                     
                     TabBarView(viewRouter: viewRouter)
                 }

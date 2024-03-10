@@ -10,7 +10,8 @@ import SwiftUI
 struct HomeView: View {
     @EnvironmentObject var user: User
     @EnvironmentObject var storeManager: EventStoreManager
-    @State var isActive = false
+    @State var calIsActive = false
+    @State var dashIsActive = false
     
     var body: some View {
         NavigationStack {
@@ -34,22 +35,26 @@ struct HomeView: View {
                         .padding(10)
                 }
                 
-                ZStack(alignment: .topLeading) {
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(Color.clear)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 10)
-                                .stroke(Color.black, lineWidth: 1)
-                        )
-                        .frame(width: 300, height: 70)
-                    Text("My Squads")
-                        .font(.headline)
-                        .foregroundColor(Color.black)
-                        .padding(10)
+                Button {
+                    dashIsActive = true
+                } label: {
+                    ZStack(alignment: .topLeading) {
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(Color.clear)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .stroke(Color.black, lineWidth: 1)
+                            )
+                            .frame(width: 300, height: 70)
+                        Text("Coaching Dashboard")
+                            .font(.headline)
+                            .foregroundColor(Color.black)
+                            .padding(10)
+                    }
                 }
                 
                 Button(action: {
-                    isActive = true;
+                    calIsActive = true
                 }, label: {
                     ZStack(alignment: .topLeading) {
                         RoundedRectangle(cornerRadius: 10)
@@ -81,18 +86,21 @@ struct HomeView: View {
                         .font(.headline)
                         .foregroundColor(Color.black)
                         .padding(10)
-                    
                 }
             }
         }
         .navigationTitle("Home")
-        .navigationDestination(isPresented: $isActive) {
+        .frame(minHeight: 0, maxHeight: .infinity, alignment: .top)
+        .navigationDestination(isPresented: $calIsActive) {
             CalendarView()
                 .task {
                     await storeManager.listenForCalendarChanges()
                 }
         }
-        .frame(minHeight: 0, maxHeight: .infinity, alignment: .top)
+        .navigationDestination(isPresented: $dashIsActive) {
+            DashboardView()
+                .frame(minHeight: 0, maxHeight: .infinity, alignment: .top)
+        }
     }
 }
 

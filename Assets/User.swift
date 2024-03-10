@@ -14,4 +14,5 @@ class User : ObservableObject {
     @Published var username: String = ""
     @Published var password: String? = nil
     @Published var email: String = ""
+    @Published var squads = []
 }
