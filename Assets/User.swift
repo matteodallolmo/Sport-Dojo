@@ -9,10 +9,11 @@ import Foundation
 
 class User : ObservableObject {
     @Published var uid: String = ""
+    @Published var userDocID: String = ""
     @Published var tutorialCompleted = false
     @Published var birthdate: Date? = nil
     @Published var username: String = ""
     @Published var password: String? = nil
     @Published var email: String = ""
-    @Published var squads = []
+    @Published var squads: [Squad] = []
 }

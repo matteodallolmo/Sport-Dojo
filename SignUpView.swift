@@ -161,7 +161,7 @@ extension SignUpView {
             user.username = username
             let database = Firestore.firestore()
             do {
-                try await database.collection("users").addDocument(data: ["username":username, "email":email, "password":password, "birthdate":birthdate,  "uid":user.uid])
+                user.userDocID = try await database.collection("users").addDocument(data: ["username":username, "email":email, "password":password, "birthdate":birthdate,  "uid":user.uid]).documentID
             } catch {
                 print("Failed to add user to database")
             }
@@ -200,7 +200,7 @@ extension SignUpView {
                 let snapshot = try await database.collection("users").whereField("uid", isEqualTo: user.uid).getDocuments()
                 print("doc count: "+snapshot.count.formatted())
                 if(snapshot.count == 0) {
-                    try await database.collection("users").addDocument(data: ["username":googleUser.profile!.givenName as Any, "email":googleUser.profile!.email as Any,  "uid":user.uid])
+                    user.userDocID = try await database.collection("users").addDocument(data: ["username":googleUser.profile!.givenName as Any, "email":googleUser.profile!.email as Any, "uid":user.uid]).documentID
                 }
             } catch {
                 print("Firebase/Google sign up failed")

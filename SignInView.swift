@@ -144,6 +144,7 @@ extension SignInView {
                 let timestamp = docData["birthdate"] as! Timestamp
                 user.birthdate = timestamp.dateValue()
                 user.username = docData["username"] as! String
+                user.userDocID = doc.documentID
             }
         } catch {
             print("Failed to sign in")
@@ -187,6 +188,7 @@ extension SignInView {
                     for doc in snapshot.documents {
                         let docData = doc.data()
                         user.username = docData["username"] as! String
+                        user.userDocID = doc.documentID
                     }
                 }
                 if(user.uid != "") {

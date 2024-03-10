@@ -6,8 +6,12 @@
 //
 
 import SwiftUI
+import Firebase
+import FirebaseFirestore
+import FirebaseCore
 
 struct DashboardView: View {
+    @EnvironmentObject var user: User
     @State var subviewSelection = "SQUADS"
     
     var body: some View {
@@ -76,11 +80,15 @@ struct DashboardView: View {
                         }
                     })
                 }
+                .padding(.top)
                 
                 Spacer()
                 
                 if(subviewSelection == "SQUADS") {
-                    SquadsView()
+                    SquadListView()
+                        .task {
+                            await fetchSquads()
+                        }
                 }
                 else if(subviewSelection == "ANALYTICS") {
                     Text("Analytics View")
@@ -94,6 +102,30 @@ struct DashboardView: View {
         }
         .navigationTitle("Dashboard")
         .frame(minHeight: 0, maxHeight: .infinity, alignment: .top)
+    }
+}
+
+extension DashboardView {
+    func fetchSquads() async {
+        do {
+            let database = Firestore.firestore()
+            let userDoc = database.collection("users").document(user.userDocID)
+            let squadDocQuery = try await userDoc.collection("squads").getDocuments().documents
+            for squadDoc in squadDocQuery {
+                let squadData = squadDoc.data()
+                if(!user.squads.contains(where: { squad1 in
+                    squad1.id == squadDoc.documentID
+                })) {
+                    user.squads.append(Squad(
+                        name: squadData["name"] as! String,
+                        id: squadDoc.documentID,
+                        size: squadData["size"] as! Int,
+                        notes: squadData["notes"] as! String))
+                }
+            }
+        } catch {
+            print("There was an error fetching your squads")
+        }
     }
 }
 

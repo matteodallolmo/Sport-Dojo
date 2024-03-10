@@ -75,12 +75,7 @@ struct ProfileView: View {
     func updateRegularProfile(username: String, password: String, birthdate: Date) async {
         do {
             let database = Firestore.firestore()
-            let documents = try await database.collection("users").whereField("uid", isEqualTo: user.uid).getDocuments().documents
-            var docid = ""
-            for doc in documents {
-                docid = doc.documentID
-            }
-            let document = database.collection("users").document(docid)
+            let document = database.collection("users").document(user.userDocID)
             
             if(!isEmpty(field: username)) {
                 user.username = username
@@ -104,11 +99,7 @@ struct ProfileView: View {
         user.username = username
         do {
             let database = Firestore.firestore()
-            let documents = try await database.collection("users").whereField("uid", isEqualTo: user.uid).getDocuments().documents
-            for doc in documents {
-                let docid = doc.documentID
-                try await database.collection("users").document(docid).setData(["username":username], merge: true)
-            }
+            try await database.collection("users").document(user.userDocID).setData(["username":username], merge: true)
         } catch {
             print("There was an error updating your account")
         }
