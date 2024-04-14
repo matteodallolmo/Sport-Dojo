@@ -49,28 +49,35 @@ struct SquadListView: View {
                     }
                 }
                 
-                TextField("New squad name", text: $newSquadName)
-                    .padding()
-                
-                Button {
-                    Task {
-                        if(newSquadName != "") {
-                            await addSquad(name: newSquadName)
+                VStack(spacing: 16) {
+                    TextField("New squad name", text: $newSquadName)
+                        .padding()
+                        .background(Color(.systemGray6))
+                        .cornerRadius(10)
+
+                    Button {
+                        Task {
+                            if(newSquadName != "") {
+                                await addSquad(name: newSquadName)
+                            }
+                            else {
+                                print("Empty squad name")
+                            }
                         }
-                        else {
-                            print("Empty squad name")
+                    } label: {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 20)
+                                .frame(maxWidth: .infinity, maxHeight: 50)
+                                .foregroundStyle(.blue)
+
+                            Text("Create new squad")
+                                .foregroundStyle(.white)
                         }
                     }
-                } label: {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 20)
-                            .frame(width: 300, height: 50)
-                            .foregroundStyle(.blue)
-                        
-                        Text("Create new squad")
-                            .foregroundStyle(.white)
-                    }
-                }.padding()
+                }
+                .frame(alignment: .center)
+                .padding(.horizontal, 12)
+                .padding(.top, 10)
             }
         }
     }
