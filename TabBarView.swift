@@ -61,7 +61,7 @@ struct TabBarView: View {
             .padding(.bottom, 20)
             //HStack end
         }
-}//body end
+    }//body end
 }
 
 #Preview {

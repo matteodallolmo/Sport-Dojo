@@ -19,7 +19,10 @@ struct SignUpView: View {
     @State var username = ""
     @State var birthdate = Date()
     @State var isActive = false
+    @State var showError = false
 
+    private let messageDuration: TimeInterval = 2.5 // Duration in seconds
+    
     @EnvironmentObject var user: User
     
     var body: some View {
@@ -111,6 +114,17 @@ struct SignUpView: View {
                                     .stroke(.gray.opacity(0.8), lineWidth: 1))
                         })
                     }.padding(.horizontal)
+                    
+                    if(showError) {
+                        Text("Failed to sign up")
+                            .foregroundStyle(.red)
+                            .padding()
+                            .onAppear {
+                                DispatchQueue.main.asyncAfter(deadline: .now() + messageDuration) {
+                                    showError = false
+                                }
+                            }
+                    }
                 }//nav stack
                 .navigationBarBackButtonHidden(true)
                 .navigationDestination(isPresented: $isActive) {
@@ -164,9 +178,11 @@ extension SignUpView {
                 user.userDocID = try await database.collection("users").addDocument(data: ["username":username, "email":email, "password":password, "birthdate":birthdate,  "uid":user.uid]).documentID
             } catch {
                 print("Failed to add user to database")
+                showError = true
             }
         } catch {
             print("Failed to sign up with email/password")
+            showError = true
         }
     }
     
@@ -204,9 +220,11 @@ extension SignUpView {
                 }
             } catch {
                 print("Firebase/Google sign up failed")
+                showError = true
             }
         } catch {
             print("Google token failed")
+            showError = true
         }
     }
 }

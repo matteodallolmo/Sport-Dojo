@@ -111,7 +111,6 @@ struct EventList: View {
             }
         }
     }
-
 }
 
 struct EventList_Previews: PreviewProvider {

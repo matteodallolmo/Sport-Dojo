@@ -16,6 +16,9 @@ struct SignInView: View {
     @State var email = ""
     @State var password = ""
     @State var isActive = false
+    @State var showError = false
+    
+    private let messageDuration: TimeInterval = 2.5 // Duration in seconds
     
     @EnvironmentObject var user: User
     
@@ -96,6 +99,17 @@ struct SignInView: View {
                                     .stroke(.gray.opacity(0.8), lineWidth: 1))
                         })
                     }.padding(.horizontal)
+                    
+                    if(showError) {
+                        Text("Failed to sign up")
+                            .foregroundStyle(.red)
+                            .padding()
+                            .onAppear {
+                                DispatchQueue.main.asyncAfter(deadline: .now() + messageDuration) {
+                                    showError = false
+                                }
+                            }
+                    }
                 }//nav stack
                 .navigationBarBackButtonHidden(true)
                 .navigationDestination(isPresented: $isActive) {
@@ -148,6 +162,7 @@ extension SignInView {
             }
         } catch {
             print("Failed to sign in")
+            showError = true
         }
     }
     
@@ -162,6 +177,7 @@ extension SignInView {
               let window = windowScene.windows.first,
               let rootVC = window.rootViewController else {
             print("There is no root vc")
+            @State var showError = false
             return
         }
         
@@ -199,9 +215,11 @@ extension SignInView {
                 }
             } catch {
                 print("Firebase/Google sign in failed")
+                showError = false
             }
         } catch {
             print("Google token failed")
+            showError = false
         }
     }
 }

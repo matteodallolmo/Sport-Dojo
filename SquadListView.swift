@@ -12,88 +12,86 @@ import FirebaseCore
 
 struct SquadListView: View {
     @EnvironmentObject var user: User
-    @State var newSquadName: String = ""
+
+    @State var presentNewSquadView = false
+    @State var editMode: EditMode = .inactive
+    @State var selection: Set<Squad> = []
     
     var body: some View {
-        if user.squads.isEmpty {
-            Text("You don't have any teams right now")
-                .font(.title)
-                .multilineTextAlignment(.center)
-                .opacity(0.55)
-                .padding(.horizontal)
-        } else {
-            VStack() {
-                HStack() {
-                    Text("Squads")
-                        .font(.headline)
-                        .fontWeight(.bold)
-                        .multilineTextAlignment(.leading)
-                        .padding([.top, .horizontal])
+        VStack {
+            if user.squads.isEmpty {
+                Text("You don't have any teams right now")
+                    .font(.title)
+                    .multilineTextAlignment(.center)
+                    .opacity(0.55)
+                    .padding(.horizontal)
+            } else {
+                VStack() {
+                    HStack() {
+                        Text("Squads")
+                            .font(.headline)
+                            .fontWeight(.bold)
+                            .multilineTextAlignment(.leading)
+                            .padding([.top, .horizontal])
+                        
+                        Spacer()
+                    }
                     
-                    Spacer()
-                }
-                
-                List(0..<user.squads.count) { squadIndex in
-                    NavigationLink {
-                        SquadDetailView(squadIndex: squadIndex)
-                            .task {
-                                await fetchPlayers(squadIndex: squadIndex)
+                    List(user.squads, id: \.self, selection: $selection) { squad in
+                        NavigationLink {
+                            SquadDetailView(squadID: squad.id)
+                                .task {
+                                    await fetchPlayers(squadID: squad.id)
+                                }
+                        } label: {
+                            VStack(alignment: .leading) {
+                                Text(squad.name)
+                                    .fontWeight(.semibold)
+                                Text(squad.notes)
+                                    .font(.footnote)
                             }
-                    } label: {
-                        VStack(alignment: .leading) {
-                            Text(user.squads[squadIndex].name)
-                                .fontWeight(.semibold)
-                            Text(user.squads[squadIndex].notes)
-                                .font(.footnote)
                         }
                     }
+                    .toolbar(content: toolbarContent)
+                    .environment(\.editMode, $editMode)
                 }
-                
-                VStack(spacing: 16) {
-                    TextField("New squad name", text: $newSquadName)
-                        .padding()
-                        .background(Color(.systemGray6))
-                        .cornerRadius(10)
-
-                    Button {
-                        Task {
-                            if(newSquadName != "") {
-                                await addSquad(name: newSquadName)
-                            }
-                            else {
-                                print("Empty squad name")
-                            }
-                        }
-                    } label: {
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 20)
-                                .frame(maxWidth: .infinity, maxHeight: 50)
-                                .foregroundStyle(.blue)
-
-                            Text("Create new squad")
-                                .foregroundStyle(.white)
-                        }
-                    }
-                }
-                .frame(alignment: .center)
-                .padding(.horizontal, 12)
-                .padding(.top, 10)
             }
+            
+            Button {
+                presentNewSquadView = true
+            } label: {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 20)
+                        .frame(maxWidth: .infinity, maxHeight: 50)
+                        .foregroundStyle(.blue)
+                    
+                    Text("Create new squad")
+                        .foregroundStyle(.white)
+                }
+            }
+            .padding()
         }
+        .sheet(isPresented: $presentNewSquadView, content: {
+            AddSquadView()
+                .padding()
+        })
     }
 }
 
 extension SquadListView {
-    func fetchPlayers(squadIndex: Int) async {
+    func fetchPlayers(squadID: String) async {
+        guard var squad = user.getSquad(id: squadID) else {
+            print("Squad not found")
+            return
+        }
+
         do {
             let database = Firestore.firestore()
-            let playersDoc = try await database.collection("users").document(user.userDocID).collection("squads").document(user.squads[squadIndex].id).collection("players").getDocuments().documents
+            let playersDoc = try await database.collection("users").document(user.userDocID).collection("squads").document(squadID).collection("players").getDocuments().documents
             for player in playersDoc {
                 let playerData = player.data()
-                if(!user.squads[squadIndex].players.contains(where: { player1 in
-                    player1.id == player.documentID
-                })) {
-                    user.squads[squadIndex].players.append(Player(
+                if !squad.players.contains(where: { $0.id == player.documentID }) {
+                    squad.players.append(Player(
                         name: playerData["name"] as! String,
                         notes: playerData["notes"] as! String,
                         age: playerData["age"] as! Int,
@@ -101,6 +99,8 @@ extension SquadListView {
                         id: player.documentID))
                 }
             }
+            
+            user.setSquad(id: squadID, squad: squad)
         } catch {
             print("There was an error fetching your players")
         }
@@ -109,17 +109,13 @@ extension SquadListView {
     func fetchSquads() async {
         do {
             let database = Firestore.firestore()
-            let userDoc = database.collection("users").document(user.userDocID)
-            let squadDocQuery = try await userDoc.collection("squads").getDocuments().documents
-            for squadDoc in squadDocQuery {
-                let squadData = squadDoc.data()
-                if(!user.squads.contains(where: { squad1 in
-                    squad1.id == squadDoc.documentID
-                })) {
+            let squadDoc = try await database.collection("users").document(user.userDocID).collection("squads").getDocuments().documents
+            for squad in squadDoc {
+                let squadData = squad.data()
+                if !user.squads.contains(where: { $0.id == squad.documentID }) {
                     user.squads.append(Squad(
                         name: squadData["name"] as! String,
-                        id: squadDoc.documentID,
-                        size: squadData["size"] as! Int,
+                        id: squad.documentID,
                         notes: squadData["notes"] as! String))
                 }
             }
@@ -128,13 +124,115 @@ extension SquadListView {
         }
     }
     
-    func addSquad(name: String) async {
+    @ToolbarContentBuilder
+    func toolbarContent() -> some ToolbarContent {
+        ToolbarItem(placement: .navigationBarTrailing) {
+            EditButton(editMode: $editMode) {
+                selection.removeAll()
+                editMode = .inactive
+            }
+        }
+        
+        ToolbarItem(placement: .navigationBarLeading) {
+            if editMode == .active {
+                Button(action: {
+                    removeSquads(squads: Array(selection))
+                }) {
+                    Text("Delete")
+                }
+                .disabled(selection.isEmpty)
+            }
+        }
+    }
+    
+    func removeSquads(squads: [Squad]) {
+        Task {
+            do {
+                let database = Firestore.firestore()
+                for squad in squads {
+                    try await database.collection("users").document(user.userDocID).collection("squads").document(squad.id).delete()
+                    user.squads.removeAll { squad2 in
+                        squad == squad2
+                    }
+                }
+                selection.removeAll()
+            } catch {
+                print("Failed removing players")
+            }
+        }
+    }
+}
+
+struct AddSquadView: View {
+    @EnvironmentObject var user: User
+    
+    @State var name: String = ""
+    @State var notes: String = ""
+    @State var players: [Player] = []
+    @State var showError = false
+    @State var showSuccess = false
+    
+    private let messageDuration: TimeInterval = 2.5 // Duration in seconds
+    
+    public var body: some View {
+        NavigationStack {
+            Form {
+                Section(header: Text("Basic Info")) {
+                    TextField("Name", text: $name)
+                    
+                    TextField("Notes", text: $notes)
+                        .frame(minHeight: 100)
+                }
+                
+                if showError || showSuccess {
+                    Text(showError ? "Please enter values for Name and Notes" : "Successfully added squad")
+                        .frame(maxWidth: .infinity)
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(showError ? .red : .green)
+                        .padding(15)
+                        .background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.8)))
+                        .transition(.move(edge: .bottom))
+                        .onAppear {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + messageDuration) {
+                                showError = false
+                                showSuccess = false
+                            }
+                        }
+                }
+            }
+            
+            Button {
+                Task {
+                    if(name != "" && notes != "") {
+                        await addSquad(name: name, notes: notes)
+                        showSuccess = true
+                        name = ""
+                        notes = ""
+                    }
+                    else {
+                        showError = true
+                    }
+                }
+            } label: {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 20)
+                        .frame(maxWidth: .infinity, maxHeight: 50)
+                        .foregroundStyle(.blue)
+
+                    Text("Add new squad")
+                        .foregroundStyle(.white)
+                }
+            }
+            .padding()
+        }
+        .navigationTitle("Add Squad")
+    }
+    
+    func addSquad(name: String, notes: String) async {
         do {
             let database = Firestore.firestore()
-            let docID = try await database.collection("users").document(user.userDocID).collection("squads")
-                .addDocument(data: ["name" : name, "notes": "New Team", "size": 0]).documentID
-            user.squads.append(Squad(name: name, id: docID, size: 0, notes: "New Team"))
-            newSquadName = ""
+            let docID = try await database.collection("users").document(user.userDocID).collection("squads").addDocument(data: ["name" : name, "notes" : notes]).documentID
+            user.squads.append(Squad(name: name, id: docID, notes: notes, players: []))
         } catch {
             print("Error creating new squad")
         }

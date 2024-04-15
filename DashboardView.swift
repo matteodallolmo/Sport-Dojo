@@ -119,7 +119,6 @@ extension DashboardView {
                     user.squads.append(Squad(
                         name: squadData["name"] as! String,
                         id: squadDoc.documentID,
-                        size: squadData["size"] as! Int,
                         notes: squadData["notes"] as! String))
                 }
             }
